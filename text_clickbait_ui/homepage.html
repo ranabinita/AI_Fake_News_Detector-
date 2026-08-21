@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Welcome | AI Headline Analyzer</title>
+  <style>
+    /* Basic Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body, html {
+  height: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow-x: hidden; /* ✅ Allows vertical scrolling */
+  scroll-behavior: smooth; /* ✅ Smooth scrolling to anchor */
+}
+
+
+    /* Particle Background Container */
+    #particles-js {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      z-index: -1;
+    }
+
+    /* Navigation Bar */
+    nav {
+      width: 100%;
+      padding: 20px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: rgba(0, 0, 0, 0.6);
+      color: #fff;
+    }
+
+    nav h2 {
+      font-size: 1.5em;
+      color: #00e6e6;
+    }
+
+    nav .toggle-mode {
+      background: none;
+      border: 2px solid #00e6e6;
+      color: #00e6e6;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    nav .toggle-mode:hover {
+      background: #00e6e6;
+      color: #003333;
+    }
+
+    /* Main Container */
+    .container {
+      position: relative;
+      z-index: 2;
+      max-width: 600px;
+      margin: 120px auto;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 40px;
+      border-radius: 16px;
+      text-align: center;
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(6px);
+    }
+
+    .container img {
+      width: 100px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      color: #00e6e6;
+    }
+
+    p {
+      font-size: 1.2em;
+      margin: 10px 0 30px;
+    }
+
+    .btn {
+      background: #00e6e6;
+      border: none;
+      color: #003333;
+      padding: 12px 24px;
+      font-size: 1em;
+      border-radius: 10px;
+      cursor: pointer;
+      margin: 0 10px;
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+      background: #00bfbf;
+      transform: scale(1.05);
+    }
+
+    /* Dark Mode */
+    body.dark {
+      background: #111;
+      color: #eee;
+    }
+
+    body.dark nav,
+    body.dark .container {
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    body.dark .btn {
+      background: #66ffff;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Particle Background -->
+  <div id="particles-js"></div>
+
+  <!-- Navigation -->
+  <nav>
+    <h2>🧠 AI Analyzer</h2>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container">
+    <img src="https://cdn-icons-png.flaticon.com/512/3449/3449872.png" alt="AI Icon" />
+    <h1>Welcome to AI Headline Analyzer</h1>
+    <p>Detect Fake News or Clickbait headlines instantly!</p>
+    <button class="btn" onclick="window.location.href='index.html#login'">Login</button>
+    <button class="btn" onclick="window.location.href='index.html#register'">Register</button>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+  <!-- Particle.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+
+  <script>
+    // Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyB9qu7-oYNqhMVFii227nokfhlU8re7Fr4",
+      authDomain: "ai-fake-news-detector-77f7c.firebaseapp.com",
+      projectId: "ai-fake-news-detector-77f7c",
+      storageBucket: "ai-fake-news-detector-77f7c.appspot.com",
+      messagingSenderId: "71457327511",
+      appId: "1:71457327511:web:74fa67f948d090dc009cd2",
+      measurementId: "G-HYNDTEVVRZ"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+
+    // Initialize particles
+    particlesJS("particles-js", {
+      "particles": {
+        "number": { "value": 80 },
+        "color": { "value": "#00e6e6" },
+        "shape": { "type": "circle" },
+        "opacity": { "value": 0.4 },
+        "size": { "value": 4 },
+        "line_linked": {
+          "enable": true,
+          "distance": 150,
+          "color": "#00e6e6",
+          "opacity": 0.3,
+          "width": 1
+        },
+        "move": {
+          "enable": true,
+          "speed": 3,
+          "direction": "none"
+        }
+      },
+      "interactivity": {
+        "events": {
+          "onhover": { "enable": true, "mode": "grab" },
+          "onclick": { "enable": true, "mode": "push" }
+        }
+      },
+      "retina_detect": true
+    });
+
+    //function toggleMode() {
+    //  document.body.classList.toggle("dark");
+      // Save preference to localStorage
+     // const isDark = document.body.classList.contains("dark");
+     // localStorage.setItem('darkMode', isDark);
+   // }
+
+    // Check for saved dark mode preference
+    window.addEventListener('DOMContentLoaded', () => {
+      const darkMode = localStorage.getItem('darkMode') === 'true';
+      if (darkMode) {
+        document.body.classList.add('dark');
+      }
+    });
+    </script>
+  
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login / Register | AI Headline Analyzer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 40px;
+      border-radius: 16px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      width: 360px;
+      text-align: center;
+    }
+
+    h2 {
+      color: #00e6e6;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+
+    input::placeholder {
+      color: #ccc;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      background: #00e6e6;
+      border: none;
+      border-radius: 8px;
+      color: #003333;
+      font-size: 1em;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #00cccc;
+    }
+
+    .link {
+      margin-top: 10px;
+      color: #a8f7ff;
+      cursor: pointer;
+    }
+
+    .error {
+      color: #ff8080;
+      margin-top: 8px;
+    }
+
+    .success {
+      color: lightgreen;
+      margin-top: 8px;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Login Form -->
+    <div id="login-form">
+      <h2>Login</h2>
+      <input id="login-email" placeholder="Email Address" />
+      <input id="login-password" type="password" placeholder="Password" />
+      <button onclick="login()">Login</button>
+      <p class="link" onclick="toggleForm('register')">Don't have an account? Register</p>
+      <p class="error" id="login-error"></p>
+    </div>
+
+    <!-- Register Form -->
+    <div id="register-form" class="hidden">
+      <h2>Register</h2>
+      <input id="reg-email" placeholder="Email Address" />
+      <input id="reg-username" placeholder="Username" />
+      <input id="reg-password" type="password" placeholder="Password" />
+      <button onclick="register()">Register</button>
+      <p class="link" onclick="toggleForm('login')">Already have an account? Login</p>
+      <p class="error" id="register-error"></p>
+      <p class="success" id="register-success"></p>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyB9qu7-oYNqhMVFii227nokfhlU8re7Fr4",
+      authDomain: "ai-fake-news-detector-77f7c.firebaseapp.com",
+      projectId: "ai-fake-news-detector-77f7c",
+      storageBucket: "ai-fake-news-detector-77f7c.appspot.com",
+      messagingSenderId: "71457327511",
+      appId: "1:71457327511:web:74fa67f948d090dc009cd2"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    function toggleForm(form) {
+      document.getElementById("login-form").classList.toggle("hidden", form !== "login");
+      document.getElementById("register-form").classList.toggle("hidden", form !== "register");
+      document.getElementById("login-error").textContent = "";
+      document.getElementById("register-error").textContent = "";
+      document.getElementById("register-success").textContent = "";
+    }
+
+    async function register() {
+      const email = document.getElementById("reg-email").value.trim();
+      const username = document.getElementById("reg-username").value.trim();
+      const password = document.getElementById("reg-password").value.trim();
+      const errorMsg = document.getElementById("register-error");
+      const successMsg = document.getElementById("register-success");
+
+      errorMsg.textContent = "";
+      successMsg.textContent = "";
+
+      if (!email.endsWith("@gmail.com")) {
+        errorMsg.textContent = "Email must be a @gmail.com address.";
+        return;
+      }
+
+      const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[a-z]).{6,}$/;
+      if (!passwordRegex.test(password)) {
+        errorMsg.textContent = "Password must include uppercase, lowercase, number, and be at least 6 characters.";
+        return;
+      }
+
+      try {
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+
+        await db.collection("users").doc(userCredential.user.uid).set({
+          username,
+          email,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        successMsg.textContent = "Registration successful. Please login.";
+        toggleForm("login");
+      } catch (error) {
+        errorMsg.textContent = error.message;
+      }
+    }
+
+    async function login() {
+      const email = document.getElementById("login-email").value.trim();
+      const password = document.getElementById("login-password").value.trim();
+      const errorMsg = document.getElementById("login-error");
+
+      errorMsg.textContent = "";
+
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        window.location.href = "homepage.html";
+      } catch (error) {
+        errorMsg.textContent = error.message;
+      }
+    }
+  </script>
+
+</body>
+</html>

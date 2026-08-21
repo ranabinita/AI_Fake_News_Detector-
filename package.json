@@ -1,0 +1,35 @@
+{
+  "name": "ai-news-detector",
+  "version": "1.0.0",
+  "description": "AI-based fake news detector backend using Express, Python integration, and Google Custom Search API.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "start": "node index.js"
+  },
+  "author": "Binita Rana",
+  "license": "ISC",
+  "keywords": [
+    "AI",
+    "news",
+    "detector",
+    "fake-news",
+    "express",
+    "nodejs"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "axios": "^1.10.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^4.21.2",
+    "fuse.js": "^7.1.0",
+    "node-fetch": "^3.3.2",
+    "python-shell": "^5.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}

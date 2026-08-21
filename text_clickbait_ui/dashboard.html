@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fake News Checker Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* --- Global & Base Styles --- */
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #app-container {
+            display: flex;
+            width: 100%;
+            max-width: 1600px;
+            height: 95vh;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            overflow: hidden;
+        }
+
+        /* --- Sidebar for History & User Profile --- */
+        #sidebar {
+            width: 280px;
+            background-color: #f1f5f9;
+            padding: 1.5rem;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            transition: transform 0.3s ease, width 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        /* User Profile in Sidebar */
+        #user-profile {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding-bottom: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        #user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 700;
+            color: #334155;
+        }
+        
+        #user-avatar {
+            width: 40px;
+            height: 40px;
+            background: #2563eb;
+            color: white;
+            font-weight: 900;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.6);
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        
+        #user-name {
+            font-size: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #logout-btn {
+            cursor: pointer;
+            background: #ef4444;
+            border: none;
+            color: white;
+            padding: 0.5rem 1.2rem;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            font-weight: 700;
+            transition: background-color 0.3s ease;
+            user-select: none;
+            box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+            white-space: nowrap;
+            margin-left: 1rem;
+        }
+
+        #logout-btn:hover {
+            background: #dc2626;
+        }
+
+        #sidebar h2 {
+            font-size: 1.25rem;
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+        }
+
+        #history-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .history-item {
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            background-color: #e2e8f0;
+            color: #475569;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 500;
+        }
+
+        .history-item:hover {
+            background-color: #cbd5e1;
+            transform: translateX(5px);
+        }
+
+        /* --- Main Content Area --- */
+        #main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+            background-color: #fff;
+            overflow-y: auto;
+            color: #1e293b;
+            transition: all 0.3s ease;
+        }
+
+        /* Header (simplified) */
+        #header {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 1rem;
+        }
+
+        /* --- Chat Window --- */
+        #chat-window {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            padding: 1.5rem;
+            overflow-y: auto;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            scrollbar-width: thin;
+            scrollbar-color: #94a3b8 transparent;
+        }
+
+        #chat-window::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #chat-window::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 8px;
+        }
+
+        /* --- Chat Messages --- */
+        .message {
+            margin-bottom: 1.25rem;
+            padding: 1rem 1.2rem;
+            border-radius: 16px;
+            max-width: 75%;
+            line-height: 1.4;
+            user-select: text;
+            word-break: break-word;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            font-size: 1rem;
+        }
+
+        .user-msg {
+            background-color: #dbeafe;
+            color: #1e40af;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+            font-weight: 600;
+        }
+
+        .ai-msg {
+            background-color: #f9fafb;
+            color: #111827;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            font-weight: 400;
+        }
+
+        /* --- Input Area --- */
+        #input-area {
+            display: flex;
+            gap: 1rem;
+        }
+
+        #chatInput {
+            flex-grow: 1;
+            padding: 0.75rem 1.2rem;
+            font-size: 1rem;
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            outline: none;
+        }
+
+        #chatInput:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 6px rgba(37, 99, 235, 0.5);
+        }
+
+        #sendBtn {
+            background-color: #2563eb;
+            border: none;
+            color: white;
+            padding: 0 1.5rem;
+            font-size: 1.1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            user-select: none;
+            box-shadow: 0 2px 10px rgba(37, 99, 235, 0.6);
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        #sendBtn:hover:not(:disabled) {
+            background-color: #1e40af;
+            transform: translateY(-2px);
+        }
+
+        #sendBtn:disabled {
+            background-color: #94a3b8;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        /* Highlight container for fake news results */
+        .fake-news-result {
+            background-color: #fff4f4;
+            border-left: 5px solid #ef4444; /* red */
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15);
+            color: #991b1b;
+            font-weight: 600;
+            white-space: pre-wrap;
+        }
+
+        /* Styling for Clickbait Results */
+        .clickbait-result {
+            background-color: #fffbeb; /* light yellow */
+            border-left: 5px solid #f59e0b; /* orange */
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+            color: #9a3412;
+            font-weight: 600;
+            white-space: pre-wrap;
+        }
+
+        /* Confidence meter container */
+        .confidence-meter-container {
+            margin-top: 0.5rem;
+            height: 14px;
+            width: 100%;
+            background-color: #f3f4f6; /* light gray */
+            border-radius: 7px;
+            overflow: hidden;
+        }
+
+        /* Dynamic confidence meter bar */
+        .confidence-meter-bar {
+            height: 100%;
+            border-radius: 7px 0 0 7px;
+            transition: width 0.4s ease;
+        }
+
+        /* Red to green gradient for confidence */
+        .confidence-high { background-color: #dc2626; } /* red - high fake/clickbait */
+        .confidence-medium { background-color: #fbbf24; } /* yellow */
+        .confidence-low { background-color: #16a34a; } /* green - low fake/clickbait */
+
+
+        /* --- Spinner & Mode Buttons --- */
+        #spinner {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            font-size: 1.25rem;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            box-shadow: 0 0 8px rgba(100, 116, 139, 0.5);
+            z-index: 1000;
+            display: none;
+            user-select: none;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        #spinner.visible {
+            display: block;
+        }
+
+        #mode-buttons {
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .mode-btn {
+            cursor: pointer;
+            padding: 0.75rem 1.5rem;
+            font-weight: 700;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            background-color: #e2e8f0;
+            color: #334155;
+            transition: all 0.3s ease;
+            user-select: none;
+            box-shadow: 3px 3px 7px rgba(0, 0, 0, 0.1);
+        }
+
+        .mode-btn.active {
+            background-color: #2563eb;
+            color: white;
+            border-color: #1d4ed8;
+            box-shadow: 0 6px 15px rgba(37, 99, 235, 0.7);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div id="app-container">
+        <nav id="sidebar" aria-label="Conversation history sidebar">
+            <div id="user-profile">
+                <div id="user-info">
+                    <div id="user-avatar" aria-hidden="true">U</div>
+                    <span id="user-name">Loading...</span>
+                </div>
+                <button id="logout-btn" title="Logout" aria-label="Logout">Logout</button>
+            </div>
+            <h2>History</h2>
+            <ul id="history-list" tabindex="0" aria-live="polite"></ul>
+        </nav>
+
+        <main id="main-content">
+            <header id="header">
+                <div id="mode-buttons">
+                    <button id="fake-news-btn" class="mode-btn active">Fake News Detection</button>
+                    <button id="clickbait-btn" class="mode-btn">Clickbait Detection</button>
+                </div>
+            </header>
+
+            <section id="chat-window" role="log" aria-live="polite" aria-relevant="additions"></section>
+
+            <form id="input-area" aria-label="Chat input area" autocomplete="off" onsubmit="return false;">
+                <input id="chatInput" type="text" aria-label="Enter news headline or question" placeholder="Enter news headline or question" required />
+                <button id="sendBtn" type="submit" aria-label="Send message">Send</button>
+            </form>
+        </main>
+
+        <div id="spinner" aria-live="polite" aria-atomic="true" role="alert" aria-label="Loading spinner">⏳ Loading...</div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Initialize Firebase with your project config
+        const firebaseConfig = {
+            apiKey: "AIzaSyB9qu7-oYNqhMVFii227nokfhlU8re7Fr4",
+            authDomain: "ai-fake-news-detector-77f7c.firebaseapp.com",
+            projectId: "ai-fake-news-detector-77f7c",
+            storageBucket: "ai-fake-news-detector-77f7c.appspot.com",
+            messagingSenderId: "71457327511",
+            appId: "1:71457327511:web:74fa67f948d090dc009cd2"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const chatWindow = document.getElementById("chat-window");
+            const chatInput = document.getElementById("chatInput");
+            const sendBtn = document.getElementById("sendBtn");
+            const fakeNewsBtn = document.getElementById("fake-news-btn");
+            const clickbaitBtn = document.getElementById("clickbait-btn");
+            const spinner = document.getElementById("spinner");
+            const logoutBtn = document.getElementById("logout-btn");
+            const historyList = document.getElementById("history-list");
+            const userNameSpan = document.getElementById("user-name"); // HTML element to display name
+            const userAvatarDiv = document.getElementById("user-avatar"); // HTML element to display initial
+            let currentMode = "fake-news"; // default mode
+
+            // This will store the full conversation data, keyed by the headline/query
+            const searchCache = {}; 
+
+            // --- USER AUTHENTICATION STATE LISTENER ---
+            auth.onAuthStateChanged(async user => {
+                if (user) {
+                    // Set static username and avatar
+                    userNameSpan.textContent = "Hello! User";
+                    userAvatarDiv.textContent = "U";
+                    // Now that user is authenticated, load history
+                    loadHistorySidebar();
+                } else {
+                    window.location.href = "index.html"; // Redirect to login page if not authenticated
+                }
+            });
+
+            // --- History Sidebar Functions ---
+            function loadHistorySidebar() {
+                // Clear existing history items before loading
+                historyList.innerHTML = ''; 
+                const savedHistory = JSON.parse(localStorage.getItem('headlineHistory')) || [];
+                // Reverse to show most recent at top
+                savedHistory.forEach(historyEntry => addHistoryItem(historyEntry, false));
+            }
+
+            // `historyEntry` now expects an object: { query: "...", mode: "...", backendData: {...}, googleResults: [...] }
+            function addHistoryItem(historyEntry, save = true) {
+                const listItem = document.createElement("li");
+                listItem.className = "history-item";
+                listItem.textContent = historyEntry.query; // Display only the query in the history list
+                
+                listItem.addEventListener("click", () => {
+                    // When a history item is clicked, clear input, set mode, and display its saved results
+                    chatInput.value = ""; // Clear the input field
+                    setMode(historyEntry.mode, false); // Set mode, don't add "switched mode" message
+                    displayResultsInChat(historyEntry.query, historyEntry.mode, historyEntry.backendData, historyEntry.googleResults);
+                    chatInput.focus();
+                });
+                historyList.prepend(listItem); // Add to the top of the history list
+
+                if (save) {
+                    let savedHistory = JSON.parse(localStorage.getItem('headlineHistory')) || [];
+                    // Ensure unique entries by removing existing if found
+                    savedHistory = savedHistory.filter(item => item.query !== historyEntry.query);
+                    savedHistory.unshift(historyEntry); // Add new entry to the beginning
+                    localStorage.setItem('headlineHistory', JSON.stringify(savedHistory));
+                }
+            }
+
+            // --- Main Application Logic ---
+            if (logoutBtn) {
+                logoutBtn.addEventListener("click", async () => {
+                    try {
+                        await auth.signOut();
+                        localStorage.removeItem('headlineHistory'); // Clear history on logout
+                        window.location.href = "index.html"; // Redirect to login page
+                    } catch (error) {
+                        console.error("Error signing out:", error);
+                    }
+                });
+            }
+
+            function setMode(mode, addWelcomeMessage = true) {
+                currentMode = mode;
+                if (mode === "fake-news") {
+                    fakeNewsBtn.classList.add("active");
+                    clickbaitBtn.classList.remove("active");
+                    if (addWelcomeMessage) {
+                        addMessage("📰 Switched to **Fake News Detection** mode. Enter a headline.", false, true);
+                    }
+                } else {
+                    clickbaitBtn.classList.add("active");
+                    fakeNewsBtn.classList.remove("active");
+                    if (addWelcomeMessage) {
+                        addMessage("🚨 Switched to **Clickbait Detection** mode. Enter a headline.", false, true);
+                    }
+                }
+                chatInput.value = "";
+                chatInput.focus();
+                if (addWelcomeMessage) { // Only clear chat window on explicit mode switch
+                    chatWindow.innerHTML = ""; 
+                }
+            }
+
+            function addMessage(text, isUser = false, isHTML = false) {
+                const msgDiv = document.createElement("div");
+                msgDiv.className = `message ${isUser ? "user-msg" : "ai-msg"}`;
+                if (isHTML) {
+                    msgDiv.innerHTML = text;  // Renders HTML safely
+                } else {
+                    msgDiv.textContent = text;
+                }
+                chatWindow.appendChild(msgDiv);
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            }
+
+            function clearInput() {
+                chatInput.value = "";
+                chatInput.focus();
+            }
+
+            // Function to display results in the chat window based on cached data
+            function displayResultsInChat(query, mode, backendData, googleResults) {
+                chatWindow.innerHTML = ''; // Clear existing messages
+                addMessage(query, true); // Display the user's query
+
+                if (backendData && Array.isArray(backendData.results) && backendData.results.length > 0) {
+                    addMessage(mode === "fake-news" ? "📰 **Fake News Detection Results:**" : "🚨 **Clickbait Detection Results:**", false, true);
+
+                    backendData.results.forEach((item, i) => {
+                        const container = document.createElement("div");
+                        // Use different classes based on mode
+                        container.className = mode === "fake-news" ? "fake-news-result" : "clickbait-result";
+
+                        const title = document.createElement("div");
+                        title.style.fontWeight = "700";
+                        title.textContent = `${i + 1}. ${item.title}`;
+                        container.appendChild(title);
+
+                        const snippet = document.createElement("div");
+                        snippet.style.marginTop = "0.3rem";
+                        snippet.style.whiteSpace = "pre-wrap";
+                        snippet.textContent = item.snippet;
+                        container.appendChild(snippet);
+
+                        let detectedStatus;
+                        let confidenceRaw;
+                        let statusTextLabel;
+
+                        if (mode === "fake-news") {
+                            detectedStatus = item.fakeNewsDetected;
+                            confidenceRaw = item.fakeConfidence;
+                            statusTextLabel = "Fake News:";
+                        } else { // clickbait mode
+                            detectedStatus = item.isClickbait;
+                            confidenceRaw = item.clickbaitConfidence;
+                            statusTextLabel = "Clickbait:";
+                        }
+
+                        const confidence = confidenceRaw != null ? parseFloat(confidenceRaw) * 100 : null;
+                        const status = detectedStatus == null ? "Unknown" : detectedStatus ? "Yes" : "No";
+
+                        const statusDisplay = document.createElement("div");
+                        statusDisplay.style.marginTop = "0.5rem";
+                        statusDisplay.textContent = `${statusTextLabel} ${status}`;
+                        container.appendChild(statusDisplay);
+
+                        if (confidence !== null) {
+                            const meterContainer = document.createElement("div");
+                            meterContainer.className = "confidence-meter-container";
+
+                            const meterBar = document.createElement("div");
+                            meterBar.className = "confidence-meter-bar";
+
+                            if (confidence >= 70) {
+                                meterBar.classList.add("confidence-high");
+                            } else if (confidence >= 40) {
+                                meterBar.classList.add("confidence-medium");
+                            } else {
+                                meterBar.classList.add("confidence-low");
+                            }
+
+                            meterBar.style.width = `${confidence}%`;
+                            meterContainer.appendChild(meterBar);
+                            container.appendChild(meterContainer);
+
+                            const confidenceText = document.createElement("div");
+                            confidenceText.style.marginTop = "0.25rem";
+                            confidenceText.style.fontSize = "0.85rem";
+                            confidenceText.style.fontWeight = "600";
+                            confidenceText.style.color = "#6b7280";
+                            confidenceText.textContent = `Confidence: ${confidence.toFixed(1)}%`;
+                            container.appendChild(confidenceText);
+                        }
+                        chatWindow.appendChild(container);
+                    });
+                } else if (!backendData || !backendData.results || backendData.results.length === 0) {
+                    addMessage("⚠️ Unexpected backend response format or no results for this query. Please check the server or try again.", false);
+                }
+
+                if (googleResults && googleResults.length > 0) {
+                    addMessage("🔎 **Related Google News Articles:**", false, true);
+                    googleResults.forEach((item, i) => {
+                        const newsText = `
+                            <strong>${i + 1}. ${item.title}</strong><br />
+                            ${item.snippet}<br />
+                            Link: <a href="${item.link}" target="_blank" rel="noopener noreferrer">${item.link}</a>
+                        `;
+                        addMessage(newsText, false, true);
+                    });
+                }
+                 if ((!backendData || !backendData.results || backendData.results.length === 0) && (!googleResults || googleResults.length === 0)) {
+                    addMessage("⚠️ No detection results or related articles found for this query.", false);
+                }
+
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            }
+
+            async function handleSend() {
+                const query = chatInput.value.trim();
+                if (!query) return;
+
+                // Clear chat window, display user query, and a loading message
+                chatWindow.innerHTML = '';
+                addMessage(query, true);
+                // Immediately clear the input field after the message is added
+                clearInput(); 
+                addMessage(`🔍 Fetching related news and checking ${currentMode === "fake-news" ? "news authenticity..." : "clickbait..."}`, false);
+                
+                spinner.classList.add("visible");
+                sendBtn.disabled = true;
+
+                try {
+                    // Google API config
+                    const GOOGLE_API_KEY = "AIzaSyAGRze3-XVzoqyTOAaN_i9YMWVdq3WcwZM";
+                    const GOOGLE_CSE_ID = "d7dd7079a29664c29";
+
+                    const googleUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_API_KEY}&cx=${GOOGLE_CSE_ID}&q=${encodeURIComponent(query)}&num=5&sort=date`;
+                    const googleResp = await fetch(googleUrl);
+                    if (!googleResp.ok) throw new Error(`Google API error: ${googleResp.status}`);
+                    const googleData = await googleResp.json();
+
+                    const googleResults = (googleData.items || []).map(item => ({
+                        title: item.title,
+                        snippet: item.snippet,
+                        link: item.link
+                    }));
+
+                    // Backend API call config
+                    const LOCAL_HOSTNAMES = ["localhost", "127.0.0.1"];
+                    const LOCAL_PORTS = ["5500", "5501"];
+                    const currentHost = window.location.hostname;
+                    const currentPort = window.location.port;
+                    const isLocalFrontend = LOCAL_HOSTNAMES.includes(currentHost) && LOCAL_PORTS.includes(currentPort);
+                    const API_BASE_URL = isLocalFrontend ? "http://127.0.0.1:5000" : "http://127.0.0.1:5000";
+                    const endpoint = "/api/check-news";
+
+                    const backendResp = await fetch(`${API_BASE_URL}${endpoint}`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ query })
+                    });
+                    if (!backendResp.ok) throw new Error(`Backend server error: ${backendResp.status}`);
+                    const backendData = await backendResp.json();
+
+                    // Store the entire conversation in the cache and local storage
+                    const conversationData = {
+                        query: query,
+                        mode: currentMode,
+                        backendData: backendData,
+                        googleResults: googleResults
+                    };
+                    searchCache[query] = conversationData;
+                    addHistoryItem(conversationData, true); // Save to local storage
+
+                    // Remove "checking..." message
+                    if (chatWindow.lastChild && chatWindow.lastChild.textContent.startsWith("🔍")) {
+                        chatWindow.removeChild(chatWindow.lastChild);
+                    }
+
+                    // Display results from fetched data
+                    displayResultsInChat(query, currentMode, backendData, googleResults);
+
+                } catch (error) {
+                    addMessage(`❌ Error: ${error.message}`, false);
+                } finally {
+                    spinner.classList.remove("visible");
+                    sendBtn.disabled = false;
+                }
+            }
+
+            sendBtn.addEventListener("click", handleSend);
+            chatInput.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleSend();
+                }
+            });
+
+            fakeNewsBtn.addEventListener("click", () => setMode("fake-news"));
+            clickbaitBtn.addEventListener("click", () => setMode("clickbait"));
+
+            // Initialize the mode without adding a "switched mode" message on initial load
+            setMode("fake-news", false); 
+        });
+    </script>
+</body>
+</html>
